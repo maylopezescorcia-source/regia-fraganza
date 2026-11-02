@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel de la tienda · Regia by CM y Fraganza by CM</title>
+<link rel="icon" href="regia-favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="tienda-config.js" onerror="window.__sinConfig=true"></script>
+<style>
+  :root{ --ink:#1B1A21; --soft:#6E6A78; --line:#E9E6EF; --wash:#F7F5FA; --paper:#fff; --acc:#6B3FA0; --acc-soft:#EFE7FA; --ok:#1F7A4D; --ok-soft:#E3F4EA; --bad:#A3302F; --bad-soft:#FBE9E8; --gold:#9A6A2A; }
+  html[data-t="fraganza"]{ --acc:#7A4E1D; --acc-soft:#F3E6D3; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--wash);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Jost','Inter',sans-serif;font-weight:500;margin:0}
+  button,input,select,textarea{font:inherit;color:inherit}
+  .btn{border:0;border-radius:10px;padding:11px 16px;font-weight:600;cursor:pointer;background:var(--ink);color:#fff;min-height:44px}
+  .btn.acc{background:var(--acc)} .btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)} .btn.danger{background:#fff;color:var(--bad);border:1px solid #EBC9C8}
+  .btn.sm{padding:7px 11px;min-height:36px;font-size:13.5px} .btn:disabled{opacity:.55;cursor:default}
+  input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=tel],select,textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;min-height:44px}
+  textarea{min-height:80px;resize:vertical}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--acc);outline-offset:-1px;border-color:transparent}
+  label.l{display:block;font-size:13px;font-weight:600;color:var(--soft);margin:12px 0 5px}
+  .chk{display:flex;gap:10px;align-items:center;padding:10px 0;cursor:pointer} .chk input{width:20px;height:20px;accent-color:var(--acc)}
+  .hint{font-size:12.5px;color:var(--soft);margin:5px 0 0}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  /* login */
+  #login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+  .box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:26px;width:100%;max-width:420px}
+  .box h1{font-size:24px;margin-bottom:4px}
+  .msg{border-radius:10px;padding:10px 12px;font-size:14px;margin-top:12px} .msg.bad{background:var(--bad-soft);color:var(--bad)} .msg.ok{background:var(--ok-soft);color:var(--ok)}
+  /* app */
+  header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line)}
+  .hd{max-width:1100px;margin:0 auto;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .hd h1{font-size:19px;flex:1;min-width:150px}
+  .seg{display:inline-flex;background:var(--wash);border-radius:10px;padding:3px}
+  .seg button{border:0;background:transparent;padding:7px 12px;border-radius:8px;font-weight:600;cursor:pointer;color:var(--soft);min-height:36px}
+  .seg button[aria-pressed=true]{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .tabs{max-width:1100px;margin:0 auto;padding:0 16px;display:flex;gap:4px;overflow-x:auto}
+  .tabs button{border:0;background:transparent;padding:10px 12px;font-weight:600;color:var(--soft);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap}
+  .tabs button[aria-pressed=true]{color:var(--acc);border-color:var(--acc)}
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px} .bar input[type=text]{flex:1;min-width:180px} .bar select{width:auto}
+  .resumen{font-size:13.5px;color:var(--soft);margin-bottom:10px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;padding:0;display:flex;flex-direction:column}
+  .card:hover{border-color:var(--acc)}
+  .card .ph{aspect-ratio:4/5;background:var(--wash);display:flex;align-items:center;justify-content:center;position:relative}
+  .card .ph img{width:100%;height:100%;object-fit:cover} .card .ph .sin{font-size:12px;color:var(--soft)}
+  .card .tx{padding:9px 11px 11px} .card .nm{font-weight:600;font-size:14px;line-height:1.3} .card .mt{font-size:12.5px;color:var(--soft);margin-top:3px}
+  .tags{position:absolute;top:7px;left:7px;display:flex;gap:4px;flex-wrap:wrap}
+  .tag{font-size:11px;font-weight:600;padding:3px 7px;border-radius:20px;background:#fff;color:var(--ink)} .tag.oc{background:var(--ink);color:#fff} .tag.ag{background:var(--bad-soft);color:var(--bad)} .tag.td{background:#FFF3D6;color:var(--gold)} .tag.of{background:var(--acc);color:#fff}
+  .vacio{background:#fff;border:1px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--soft)}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+  .panel h2{font-size:18px;margin-bottom:4px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px} @media(max-width:560px){.row2{grid-template-columns:1fr}}
+  /* editor */
+  #ed{position:fixed;inset:0;z-index:50;background:rgba(27,26,33,.45);display:none;justify-content:center;align-items:flex-start;overflow-y:auto}
+  #ed.on{display:flex}
+  .sheet{background:#fff;width:100%;max-width:760px;min-height:100%;padding:0 0 90px}
+  @media(min-width:800px){ .sheet{margin:24px 0;border-radius:16px;min-height:0} }
+  .sh-hd{position:sticky;top:0;background:#fff;z-index:2;border-bottom:1px solid var(--line);padding:12px 16px;display:flex;align-items:center;gap:10px}
+  .sh-hd h2{flex:1;font-size:19px}
+  .sh-bd{padding:4px 16px}
+  .sh-ft{position:sticky;bottom:0;background:#fff;border-top:1px solid var(--line);padding:12px 16px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+  .sec{border-top:1px solid var(--line);margin-top:18px;padding-top:6px} .sec h3{font-size:16px;margin:10px 0 2px}
+  table.vt{width:100%;border-collapse:collapse;margin-top:8px} .vt th{font-size:12px;color:var(--soft);text-align:left;font-weight:600;padding:4px} .vt td{padding:4px;vertical-align:middle}
+  .vt input{min-height:40px;padding:8px} .vt .stk{display:flex;align-items:center;gap:4px} .vt .stk input{width:64px;text-align:center}
+  .vt .stk button,.x{border:1px solid var(--line);background:#fff;border-radius:8px;width:36px;height:40px;cursor:pointer;font-weight:700;flex:0 0 auto}
+  @media(max-width:560px){ .vt thead{display:none} .vt tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:8px} .vt td{padding:0;min-width:0} .vt .stk input{width:auto;flex:1;min-width:0} .vt td.del{margin-top:-2px} .vt td.pr,.vt td.st{grid-column:span 1} .vt td.del{grid-column:span 2;text-align:right} .vt td::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--soft);font-weight:600} }
+  .gen{background:var(--wash);border-radius:12px;padding:10px 12px;margin-top:10px}
+  .fotos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .ft{position:relative;width:92px;height:115px;border-radius:10px;overflow:hidden;background:var(--wash);border:1px solid var(--line)}
+  .ft img{width:100%;height:100%;object-fit:cover} .ft .pt{position:absolute;left:4px;bottom:4px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
+  .ft .ac{position:absolute;top:4px;right:4px;display:flex;flex-direction:column;gap:4px}
+  .ft .ac button{width:28px;height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.95);cursor:pointer;font-size:13px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .add{width:92px;height:115px;border-radius:10px;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;flex-direction:column;color:var(--soft);font-size:12px;cursor:pointer;text-align:center;gap:4px;background:#fff}
+  .add input{display:none} .add b{font-size:24px;line-height:1;color:var(--acc)}
+  .fcol{margin-top:14px} .fcol .t{font-weight:600;font-size:14px}
+  .peso{font-size:12.5px;color:var(--soft);margin-top:10px}
+  #toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:11px 16px;border-radius:10px;z-index:99;transition:transform .25s;max-width:calc(100vw - 32px);font-size:14px}
+  #toast.on{transform:translateX(-50%) translateY(0)}
+  .log{background:var(--wash);border-radius:10px;padding:10px;font-size:12.5px;max-height:260px;overflow:auto;white-space:pre-wrap;margin-top:10px;font-family:ui-monospace,monospace}
+  pre.rules{background:var(--wash);border-radius:10px;padding:12px;font-size:12px;overflow:auto;white-space:pre}
+  [hidden]{display:none !important}
+</style>
+</head>
+<body>
+
+<!-- ============ Conectar Firebase (solo la primera vez) ============ -->
+<div id="setup" hidden style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div class="box" style="max-width:560px">
+    <h1>Conectar la tienda</h1>
+    <p class="hint" style="font-size:14px">Pega la configuración de tu proyecto de Firebase de la tienda (Configuración del proyecto → Tus apps → Web → "firebaseConfig").</p>
+    <label class="l" for="su-cfg">Configuración de Firebase</label>
+    <textarea id="su-cfg" style="min-height:160px;font-family:ui-monospace,monospace;font-size:12.5px" placeholder="const firebaseConfig = { apiKey: &quot;...&quot;, authDomain: &quot;...&quot;, projectId: &quot;...&quot;, ... };"></textarea>
+    <label class="l" for="su-code">Código de la tienda</label>
+    <input type="text" id="su-code" value="regia2026">
+    <p class="hint">Déjalo así. Es el nombre interno del catálogo; Fraganza usa el mismo código terminado en "-fraganza".</p>
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn acc" onclick="guardarSetup()">Conectar</button></div>
+    <div id="su-msg"></div>
+  </div>
+</div>
+
+<!-- ============ Inicio de sesión ============ -->
+<div id="login" hidden>
+  <form class="box" onsubmit="event.preventDefault();entrar()">
+    <img src="regia-icon.png" alt="" style="width:54px;height:54px;border-radius:12px;margin-bottom:10px">
+    <h1>Panel de la tienda</h1>
+    <p class="hint" style="font-size:14px;margin-bottom:6px">Regia by CM y Fraganza by CM</p>
+    <label class="l" for="lg-email">Correo de administradora</label>
+    <input type="email" id="lg-email" autocomplete="username" required>
+    <label class="l" for="lg-pass">Contraseña</label>
+    <input type="password" id="lg-pass" autocomplete="current-password" required>
+    <button class="btn acc" style="width:100%;margin-top:16px" id="lg-btn">Entrar</button>
+    <div id="lg-msg"></div>
+    <p class="hint" style="margin-top:14px">¿Cambiaste de proyecto de Firebase? <a href="#" onclick="event.preventDefault();reconfigurar()">Conectar otro</a></p>
+  </form>
+</div>
+
+<!-- ============ Panel ============ -->
+<div id="app" hidden>
+  <header>
+    <div class="hd">
+      <h1 id="hd-tit">Panel de la tienda</h1>
+      <div class="seg" role="group" aria-label="Tienda">
+        <button data-t="regia" aria-pressed="true">Regia</button>
+        <button data-t="fraganza" aria-pressed="false">Fraganza</button>
+      </div>
+      <a class="btn ghost sm" id="ver-tienda" target="_blank" rel="noopener" style="text-decoration:none;display:inline-flex;align-items:center">Ver tienda ↗</a>
+      <button class="btn ghost sm" onclick="salir()">Salir</button>
+    </div>
+    <nav class="tabs">
+      <button data-v="productos" aria-pressed="true">Productos</button>
+      <button data-v="config" aria-pressed="false">Configuración</button>
+      <button data-v="importar" aria-pressed="false">Importar catálogo</button>
+      <button data-v="seguridad" aria-pressed="false">Seguridad</button>
+    </nav>
+  </header>
+
+  <main class="wrap">
+    <section id="v-productos">
+      <div class="bar">
+        <input type="text" id="q" placeholder="Buscar por nombre o categoría…" aria-label="Buscar">
+        <select id="filtro" aria-label="Filtrar">
+          <option value="todos">Todos</option><option value="visibles">Visibles</option><option value="ocultos">Ocultos</option>
+          <option value="agotados">Agotados</option><option value="tendencia">En tendencia</option><option value="oferta">Con descuento</option>
+        </select>
+        <button class="btn acc" onclick="abrirEditor(null)">+ Nuevo producto</button>
+      </div>
+      <div class="resumen" id="resumen">Cargando…</div>
+      <div class="grid" id="grid"></div>
+    </section>
+
+    <section id="v-config" hidden>
+      <div class="panel">
+        <h2>Configuración de <span class="nomT"></span></h2>
+        <p class="hint">Lo que ven tus clientes en la tienda. Cada tienda tiene la suya.</p>
+        <label class="chk"><input type="checkbox" id="c-abierta"> <span><b>Tienda abierta</b> — si la cierras, se puede mirar el catálogo pero no hacer pedidos</span></label>
+        <div class="row2">
+          <div><label class="l" for="c-whatsapp">WhatsApp que recibe los pedidos</label><input type="tel" id="c-whatsapp" placeholder="573128556822"></div>
+          <div><label class="l" for="c-dir">Dirección de la tienda</label><input type="text" id="c-dir"></div>
+        </div>
+        <p class="hint">El WhatsApp con indicativo 57 delante, sin espacios. Ej.: 573128556822</p>
+        <label class="l" for="c-aviso">Aviso en la parte de arriba (opcional)</label>
+        <input type="text" id="c-aviso" placeholder="Ej: ¡Envío gratis por compras desde $150.000!">
+        <label class="l">Medios de pago que aceptas</label>
+        <div id="c-medios"></div>
+        <label class="l" for="c-datos">Datos para pagar (se muestran solo al hacer el pedido)</label>
+        <textarea id="c-datos" placeholder="Nequi Negocios / Bre-B: llave 0092801187 · Regia By Cm"></textarea>
+        <h3 style="margin-top:18px;font-size:16px">Entrega</h3>
+        <label class="chk"><input type="checkbox" id="c-envio"> Envío a domicilio</label>
+        <label class="chk"><input type="checkbox" id="c-retiro"> Recoger en la tienda</label>
+        <div class="row2">
+          <div><label class="l" for="c-costo">Costo del envío</label><input type="number" id="c-costo" min="0" step="100"></div>
+          <div><label class="l" for="c-gratis">Envío gratis desde (0 = nunca)</label><input type="number" id="c-gratis" min="0" step="1000"></div>
+        </div>
+        <label class="l" for="c-tiempo">Tiempo de entrega</label>
+        <input type="text" id="c-tiempo" placeholder="Ej: 2 a 7 días hábiles">
+        <div style="margin-top:18px"><button class="btn acc" onclick="guardarConfig()">Guardar configuración</button></div>
+      </div>
+    </section>
+
+    <section id="v-importar" hidden>
+      <div class="panel">
+        <h2>Traer el catálogo de la tienda anterior</h2>
+        <p class="hint" style="font-size:14px">Copia a esta tienda los productos, el stock, las fotos y la configuración que estaban publicados desde el sistema de facturación. Se hace una sola vez; el sistema ya no vuelve a tocar la tienda.</p>
+        <label class="chk"><input type="checkbox" id="im-sobre"> Reemplazar también los productos que ya existen aquí (si ya editaste alguno, perderías esos cambios)</label>
+        <details style="margin-top:6px"><summary class="hint" style="cursor:pointer">Datos de la tienda anterior (no hace falta cambiarlos)</summary>
+          <label class="l" for="im-cfg">Proyecto anterior de Firebase</label>
+          <textarea id="im-cfg" style="font-family:ui-monospace,monospace;font-size:12px;min-height:120px"></textarea>
+          <label class="l" for="im-code">Código anterior</label><input type="text" id="im-code" value="regia2026">
+        </details>
+        <div style="margin-top:14px"><button class="btn acc" id="im-btn" onclick="importar()">Importar Regia y Fraganza</button></div>
+        <div class="log" id="im-log" hidden></div>
+      </div>
+    </section>
+
+    <section id="v-seguridad" hidden>
+      <div class="panel">
+        <h2>Reglas de seguridad</h2>
+        <p class="hint" style="font-size:14px">Pégalas en Firebase → Firestore Database → Reglas → Publicar. Así cualquiera puede ver el catálogo, pero solo tú puedes cambiarlo.</p>
+        <pre class="rules" id="reglas"></pre>
+        <button class="btn ghost sm" onclick="copiarReglas()">Copiar reglas</button>
+      </div>
+      <div class="panel">
+        <h2>Archivo de conexión</h2>
+        <p class="hint" style="font-size:14px">Si conectaste este panel pegando la configuración, descarga este archivo y súbelo a GitHub junto a la tienda.</p>
+        <button class="btn ghost sm" onclick="descargarConfig()">Descargar tienda-config.js</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ============ Editor de producto ============ -->
+<div id="ed" role="dialog" aria-modal="true" aria-labelledby="ed-tit">
+  <div class="sheet">
+    <div class="sh-hd"><button class="x" onclick="cerrarEditor()" aria-label="Cerrar">✕</button><h2 id="ed-tit">Producto</h2></div>
+    <div class="sh-bd">
+      <label class="l" for="e-nombre">Nombre</label>
+      <input type="text" id="e-nombre" maxlength="80">
+      <div class="row2">
+        <div><label class="l" for="e-cat">Categoría</label><input type="text" id="e-cat" list="cats" maxlength="40"><datalist id="cats"></datalist></div>
+        <div><label class="l" for="e-precio">Precio normal</label><input type="number" id="e-precio" min="0" step="100" placeholder="Para todas las tallas y colores"></div>
+      </div>
+      <label class="l" for="e-desc">Descripción</label>
+      <textarea id="e-desc" maxlength="600" placeholder="Material, cómo horma, cuidados…"></textarea>
+      <label class="chk"><input type="checkbox" id="e-vis"> <span><b>Visible en la tienda</b></span></label>
+      <label class="chk"><input type="checkbox" id="e-tend"> <span>Destacar <b>en tendencia</b> en la portada</span></label>
+      <div class="row2">
+        <div><label class="l" for="e-dsc">Descuento (%)</label><input type="number" id="e-dsc" min="0" max="90" step="1" placeholder="0 = sin descuento"></div>
+        <div><label class="l" for="e-hasta">Válido hasta (opcional)</label><input type="date" id="e-hasta"></div>
+      </div>
+
+      <div class="sec">
+        <h3>Tallas, colores y stock</h3>
+        <p class="hint">Cada fila es una combinación talla + color con sus unidades disponibles. Cuando vendas por WhatsApp o en el local, baja aquí las unidades.</p>
+        <div class="gen">
+          <div class="row2">
+            <div><label class="l" for="g-tallas" style="margin-top:0">Tallas</label><input type="text" id="g-tallas" placeholder="S, M, L, XL"></div>
+            <div><label class="l" for="g-colores" style="margin-top:0">Colores</label><input type="text" id="g-colores" placeholder="Negro, Blanco"></div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;margin-top:8px;flex-wrap:wrap">
+            <div style="width:130px"><label class="l" for="g-stock" style="margin-top:0">Unidades de cada una</label><input type="number" id="g-stock" min="0" value="0"></div>
+            <button class="btn ghost sm" onclick="generarVariantes()">Agregar combinaciones</button>
+          </div>
+          <p class="hint">Para perfumes o productos sin talla ni color, deja los dos campos vacíos.</p>
+        </div>
+        <table class="vt"><thead><tr><th>Talla</th><th>Color</th><th>Precio</th><th>Stock</th><th></th></tr></thead><tbody id="vt"></tbody></table>
+        <button class="btn ghost sm" onclick="agregarFila()" style="margin-top:6px">+ Agregar una fila</button>
+      </div>
+
+      <div class="sec">
+        <h3>Fotos</h3>
+        <p class="hint">Hasta 4 por color (frente, espalda…). La primera de cada color es su portada. Las "generales" se muestran con todos los colores.</p>
+        <div id="fotos"></div>
+        <div class="peso" id="peso"></div>
+      </div>
+    </div>
+    <div class="sh-ft">
+      <button class="btn danger" id="e-borrar" onclick="borrarProducto()">Eliminar</button>
+      <span style="flex:1"></span>
+      <button class="btn ghost" onclick="cerrarEditor()">Cancelar</button>
+      <button class="btn acc" id="e-guardar" onclick="guardarProducto()">Guardar</button>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>'$'+Math.round(Number(n)||0).toLocaleString('es-CO');
+function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove('on'),3200); }
+const TIENDAS={ regia:{nombre:'Regia by CM', pagina:'tienda.html'}, fraganza:{nombre:'Fraganza by CM', pagina:'fraganza.html'} };
+const MEDIOS=[
+  {id:'transferencia', label:'Transferencia / Nequi / Daviplata'},
+  {id:'contraentrega', label:'Contra entrega con Inter Rapidísimo (flete por adelantado)'},
+  {id:'tienda', label:'Pago y recogida en tienda'},
+  {id:'sistecredito', label:'Sistecrédito'},
+  {id:'addi', label:'Addi'}
+];
+const MAX_FOTOS=4, LIM_FOTOS=850000;
+// Proyecto anterior (el que usaba el sistema de facturación) — solo para importar una vez
+const ORIGEN_DEF={ apiKey:'AIzaSyDZBSJ_NftnTGlPDQhY5a8ARQVPzbp0_Mc', authDomain:'regia-bf53e.firebaseapp.com', projectId:'regia-bf53e', storageBucket:'regia-bf53e.firebasestorage.app', messagingSenderId:'412942412923', appId:'1:412942412923:web:dbf9d91869dcaa629346de' };
+
+let CFGT=null, db=null, auth=null, usuario=null;
+let tienda='regia', vista='productos';
+const PRODS={regia:[], fraganza:[]}, cargados={regia:false, fraganza:false}, unsubs=[];
+let E=null; // producto en edición
+
+/* ---------- conexión ---------- */
+function cfgGuardada(){ try{ return JSON.parse(localStorage.getItem('tiendaweb_cfg')||'null'); }catch(e){ return null; } }
+function parsearCfg(raw){
+  let t=String(raw||'').trim().replace(/^[\s\S]*?firebaseConfig\s*=\s*/,'').replace(/;[\s\S]*$/,'').trim();
+  const i=t.indexOf('{'), j=t.lastIndexOf('}'); if(i<0||j<0) return null; t=t.slice(i,j+1);
+  try{ return JSON.parse(t); }catch(e){}
+  try{ return JSON.parse(t.replace(/'/g,'"').replace(/([{,]\s*)([A-Za-z0-9_$]+)\s*:/g,'$1"$2":').replace(/,(\s*[}\]])/g,'$1')); }catch(e){ return null; }
+}
+function guardarSetup(){
+  const cfg=parsearCfg($('su-cfg').value), code=$('su-code').value.trim();
+  if(!cfg||!cfg.apiKey||!cfg.projectId){ $('su-msg').innerHTML='<div class="msg bad">No se pudo leer la configuración. Copia el bloque completo, con apiKey y projectId.</div>'; return; }
+  if(cfg.projectId===ORIGEN_DEF.projectId){ $('su-msg').innerHTML='<div class="msg bad">Esa es la configuración del sistema de facturación. Para separar la tienda necesitas el proyecto NUEVO de Firebase.</div>'; return; }
+  if(!/^[a-z0-9-]{3,40}$/i.test(code)){ $('su-msg').innerHTML='<div class="msg bad">El código solo puede tener letras, números y guiones.</div>'; return; }
+  localStorage.setItem('tiendaweb_cfg', JSON.stringify({firebaseConfig:cfg, storeCode:code}));
+  location.reload();
+}
+function reconfigurar(){ if(confirm('¿Conectar este panel a otro proyecto de Firebase?')){ localStorage.removeItem('tiendaweb_cfg'); location.href=location.pathname+'?config=1'; } }
+function iniciar(){
+  const forzar=/config=1/.test(location.search);
+  CFGT=(!forzar && !window.__sinConfig && window.TIENDA_CONFIG && window.TIENDA_CONFIG.firebaseConfig && window.TIENDA_CONFIG.firebaseConfig.apiKey && !/PEGA/.test(window.TIENDA_CONFIG.firebaseConfig.apiKey)) ? window.TIENDA_CONFIG : cfgGuardada();
+  if(!CFGT || !CFGT.firebaseConfig || !CFGT.storeCode){ $('setup').hidden=false; return; }
+  if(CFGT.firebaseConfig.projectId===ORIGEN_DEF.projectId){ $('setup').hidden=false; $('su-msg').innerHTML='<div class="msg bad">Tu tienda-config.js todavía apunta al Firebase del sistema de facturación. Pega aquí la configuración del proyecto nuevo de la tienda.</div>'; return; }
+  firebase.initializeApp(CFGT.firebaseConfig);
+  db=firebase.firestore(); auth=firebase.auth();
+  $('im-cfg').value=JSON.stringify(ORIGEN_DEF,null,2);
+  auth.onAuthStateChanged(u=>{ usuario=u; if(u){ $('login').hidden=true; $('app').hidden=false; arrancar(); } else { $('app').hidden=true; $('login').hidden=false; detener(); } });
+}
+async function entrar(){
+  const b=$('lg-btn'); b.disabled=true; $('lg-msg').innerHTML='';
+  try{ await auth.signInWithEmailAndPassword($('lg-email').value.trim(), $('lg-pass').value); }
+  catch(e){
+    const c=e&&e.code||'';
+    const m= /wrong-password|invalid-credential|invalid-login/.test(c)? 'Correo o contraseña incorrectos.' : /user-not-found/.test(c)? 'Ese correo no está registrado en Firebase → Authentication.' : /too-many/.test(c)? 'Demasiados intentos. Espera unos minutos.' : /operation-not-allowed|configuration-not-found/.test(c)? 'Activa "Correo electrónico/contraseña" en Firebase → Authentication → Método de acceso.' : 'No se pudo entrar ('+(c||e.message)+').';
+    $('lg-msg').innerHTML='<div class="msg bad">'+esc(m)+'</div>';
+  } finally { b.disabled=false; }
+}
+function salir(){ auth.signOut(); }
+const codigoDe=t=> t==='fraganza'? CFGT.storeCode+'-fraganza' : CFGT.storeCode;
+const refT=t=>db.collection('tiendas').doc(codigoDe(t));
+function detener(){ unsubs.splice(0).forEach(u=>{ try{u();}catch(e){} }); }
+function arrancar(){
+  detener();
+  ['regia','fraganza'].forEach(t=>{
+    unsubs.push(refT(t).collection('productos').onSnapshot(s=>{
+      PRODS[t]=s.docs.map(d=>Object.assign({id:d.id}, d.data())).filter(p=>p && p.nombre!==undefined && !(p.oculto && !p.nombre));
+      cargados[t]=true; if(t===tienda) pintarLista();
+    }, e=>{ console.error(e); if(t===tienda) $('resumen').innerHTML='<span style="color:var(--bad)">No se pudo leer el catálogo ('+esc(e.code||e.message)+'). Revisa las reglas en la pestaña Seguridad.</span>'; }));
+  });
+  pintarReglas(); cambiarTienda(tienda);
+}
+
+/* ---------- navegación ---------- */
+document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>cambiarTienda(b.dataset.t)));
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>cambiarVista(b.dataset.v)));
+function cambiarTienda(t){
+  tienda=t; document.documentElement.dataset.t=t;
+  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.t===t));
+  document.querySelectorAll('.nomT').forEach(e=>e.textContent=TIENDAS[t].nombre);
+  $('hd-tit').textContent=TIENDAS[t].nombre;
+  $('ver-tienda').href=TIENDAS[t].pagina;
+  pintarLista(); if(vista==='config') cargarConfig();
+}
+function cambiarVista(v){
+  vista=v; document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.v===v));
+  ['productos','config','importar','seguridad'].forEach(x=>$('v-'+x).hidden=x!==v);
+  if(v==='config') cargarConfig();
+}
+
+/* ---------- lista ---------- */
+const stockDe=p=>(p.variantes||[]).reduce((s,v)=>s+(Number(v.stock)||0),0);
+const descVigente=p=>p.descuento>0 && !(p.descHasta && Date.now()>p.descHasta);
+$('q').addEventListener('input',pintarLista); $('filtro').addEventListener('change',pintarLista);
+function pintarLista(){
+  if(!cargados[tienda]){ $('resumen').textContent='Cargando…'; $('grid').innerHTML=''; return; }
+  const q=$('q').value.trim().toLowerCase(), f=$('filtro').value, todos=PRODS[tienda];
+  let l=todos.filter(p=>(!q || ((p.nombre||'')+' '+(p.categoria||'')).toLowerCase().includes(q)));
+  l=l.filter(p=> f==='visibles'? !p.oculto : f==='ocultos'? !!p.oculto : f==='agotados'? stockDe(p)<=0 : f==='tendencia'? p.tendencia>0 : f==='oferta'? descVigente(p) : true);
+  l.sort((a,b)=>(!!a.oculto-!!b.oculto) || (a.nombre||'').localeCompare(b.nombre||'','es'));
+  const vis=todos.filter(p=>!p.oculto).length, ag=todos.filter(p=>!p.oculto&&stockDe(p)<=0).length;
+  $('resumen').textContent=todos.length+' producto(s) · '+vis+' visibles'+(ag?' · '+ag+' agotados':'')+(l.length!==todos.length?' · mostrando '+l.length:'');
+  if(!todos.length){ $('grid').innerHTML='<div class="vacio" style="grid-column:1/-1">Todavía no hay productos en '+esc(TIENDAS[tienda].nombre)+'.<br><br>Crea el primero con <b>+ Nuevo producto</b> o trae tu catálogo anterior en <b>Importar catálogo</b>.</div>'; return; }
+  $('grid').innerHTML=l.map(p=>{ const st=stockDe(p);
+    return `<button class="card" data-id="${esc(p.id)}"><div class="ph">${p.thumb?`<img src="${esc(p.thumb)}" alt="" loading="lazy">`:'<span class="sin">Sin foto</span>'}
+      <div class="tags">${p.oculto?'<span class="tag oc">Oculto</span>':''}${st<=0?'<span class="tag ag">Agotado</span>':''}${p.tendencia>0?'<span class="tag td">★ Tendencia</span>':''}${descVigente(p)?`<span class="tag of">-${p.descuento}%</span>`:''}</div></div>
+      <div class="tx"><div class="nm">${esc(p.nombre||'(sin nombre)')}</div><div class="mt">${fmt(p.precio)} · ${st} und.${p.categoria?' · '+esc(p.categoria):''}</div></div></button>`; }).join('') || '<div class="vacio" style="grid-column:1/-1">Nada coincide con la búsqueda.</div>';
+}
+$('grid').addEventListener('click',e=>{ const c=e.target.closest('.card[data-id]'); if(c) abrirEditor(c.dataset.id); });
+
+/* ---------- editor ---------- */
+const nuevoId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const limpiarTx=(s,m)=>String(s||'').replace(/[\u0000-\u001f<>`]/g,' ').replace(/\s+/g,' ').trim().slice(0,m||80);
+const isoDeMs=ms=>{ if(!ms) return ''; const d=new Date(ms); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const finDelDiaMs=iso=>{ if(!iso||!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return 0; const [y,m,d]=iso.split('-').map(Number); return new Date(y,m-1,d,23,59,59,999).getTime(); };
+const redondear=x=>Math.max(0,Math.round(x/100)*100);
+const conDescuento=(p,pct)=>{ p=Number(p)||0; return pct>0&&p>0? redondear(p*(1-pct/100)) : p; };
+const canon=c=>String(c||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+async function abrirEditor(id){
+  const p=id? PRODS[tienda].find(x=>x.id===id) : null;
+  const vig=p&&descVigente(p);
+  E={ id:p?p.id:nuevoId(), nuevo:!p, tienda, orig:p,
+      variantes:(p?p.variantes||[]:[]).map(v=>({id:v.id||nuevoId(), talla:v.talla==='Única'?'':(v.talla||''), color:v.color==='Único'?'':(v.color||''), precio:Number(v.precioAntes||v.precio)||0, stock:Math.max(0,Number(v.stock)||0)})),
+      fotos:[], fotosCargadas:!p, fotosCambiaron:false };
+  $('ed-tit').textContent=p? 'Editar producto' : 'Nuevo producto · '+TIENDAS[tienda].nombre;
+  $('e-nombre').value=p?p.nombre||'':''; $('e-cat').value=p?p.categoria||'':''; $('e-desc').value=p?p.descripcion||'':'';
+  const precios=E.variantes.map(v=>v.precio).filter(x=>x>0); $('e-precio').value=precios.length&&precios.every(x=>x===precios[0])? precios[0] : '';
+  $('e-vis').checked=p? !p.oculto : true; $('e-tend').checked=!!(p&&p.tendencia>0);
+  $('e-dsc').value=vig? p.descuento : ''; $('e-hasta').value=vig? isoDeMs(p.descHasta) : '';
+  $('g-tallas').value=''; $('g-colores').value=''; $('g-stock').value=0;
+  $('e-borrar').hidden=!p; $('e-guardar').disabled=false;
+  $('cats').innerHTML=[...new Set(PRODS[tienda].map(x=>x.categoria).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">`).join('');
+  pintarVariantes(); pintarFotos();
+  $('ed').classList.add('on'); document.body.style.overflow='hidden'; $('ed').scrollTop=0;
+  if(p){
+    try{ const d=await refT(tienda).collection('fotos').doc(p.id).get(); if(!E||E.id!==p.id) return;
+      const dd=d.exists? d.data() : {}; E.fotos=(dd.imgs||[]).map((src,i)=>({src, color:(dd.colores||[])[i]||''}));
+      // fotos de Fraganza que quedaron en la base de Regia (versión anterior)
+      if(!E.fotos.length && tienda==='fraganza' && p.nFotos>0){ const d2=await refT('regia').collection('fotos').doc(p.id).get(); if(d2.exists){ const x=d2.data(); E.fotos=(x.imgs||[]).map((src,i)=>({src, color:(x.colores||[])[i]||''})); E.fotosCambiaron=E.fotos.length>0; } }
+      if(!E.fotos.length && p.thumb){ E.fotos=[{src:p.thumb, color:''}]; }
+      E.fotosCargadas=true;
+    }catch(e){ console.error(e); toast('⚠ No se pudieron cargar las fotos. Puedes guardar los demás datos; las fotos no se tocan.'); }
+    pintarFotos();
+  }
+}
+function cerrarEditor(){ $('ed').classList.remove('on'); document.body.style.overflow=''; E=null; }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && $('ed').classList.contains('on')) cerrarEditor(); });
+function leerVariantes(){
+  document.querySelectorAll('#vt tr').forEach(tr=>{ const v=E.variantes[+tr.dataset.i]; if(!v) return;
+    v.talla=tr.querySelector('.it').value.trim(); v.color=tr.querySelector('.ic').value.trim();
+    v.precio=Math.max(0,parseFloat(tr.querySelector('.ip').value)||0); v.stock=Math.max(0,parseInt(tr.querySelector('.is').value,10)||0); });
+}
+function pintarVariantes(){
+  $('vt').innerHTML=E.variantes.map((v,i)=>`<tr data-i="${i}">
+    <td data-l="Talla"><input type="text" class="it" value="${esc(v.talla)}" placeholder="Única"></td>
+    <td data-l="Color"><input type="text" class="ic" value="${esc(v.color)}" placeholder="Único" onchange="leerVariantes();pintarFotos()"></td>
+    <td class="pr" data-l="Precio"><input class="ip" type="number" min="0" step="100" value="${v.precio||''}"></td>
+    <td class="st" data-l="Stock"><div class="stk"><button type="button" onclick="pasoStock(${i},-1)" aria-label="Menos">−</button><input class="is" type="number" min="0" value="${v.stock}"><button type="button" onclick="pasoStock(${i},1)" aria-label="Más">+</button></div></td>
+    <td class="del"><button type="button" class="x" onclick="quitarFila(${i})" aria-label="Quitar fila">🗑</button></td></tr>`).join('')
+    || '<tr><td colspan="5" class="hint" style="padding:10px 4px">Sin filas todavía. Usa "Agregar combinaciones" o "+ Agregar una fila".</td></tr>';
+}
+function pasoStock(i,d){ leerVariantes(); const v=E.variantes[i]; v.stock=Math.max(0,v.stock+d); pintarVariantes(); }
+function quitarFila(i){ leerVariantes(); E.variantes.splice(i,1); pintarVariantes(); pintarFotos(); }
+function agregarFila(){ leerVariantes(); E.variantes.push({id:nuevoId(), talla:'', color:'', precio:parseFloat($('e-precio').value)||0, stock:0}); pintarVariantes(); }
+function generarVariantes(){
+  leerVariantes();
+  const ts=$('g-tallas').value.split(',').map(s=>s.trim()).filter(Boolean), cs=$('g-colores').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const st=Math.max(0,parseInt($('g-stock').value,10)||0), pr=parseFloat($('e-precio').value)||0; let n=0;
+  (ts.length?ts:['']).forEach(t=>(cs.length?cs:['']).forEach(c=>{
+    if(E.variantes.some(v=>canon(v.talla)===canon(t) && canon(v.color)===canon(c))) return;
+    E.variantes.push({id:nuevoId(), talla:t, color:c, precio:pr, stock:st}); n++; }));
+  pintarVariantes(); pintarFotos(); toast(n? n+' combinación(es) agregada(s)' : 'Esas combinaciones ya estaban');
+}
+$('e-precio').addEventListener('change',()=>{ const pr=parseFloat($('e-precio').value)||0; if(!pr||!E) return; leerVariantes(); E.variantes.forEach(v=>v.precio=pr); pintarVariantes(); });
+
+/* ---------- fotos ---------- */
+function coloresProducto(){ const m=new Map(); E.variantes.forEach(v=>{ const c=v.color||'Único'; if(!m.has(canon(c))) m.set(canon(c),c); }); return [...m.values()]; }
+function pintarFotos(){
+  if(!E) return;
+  if(!E.fotosCargadas){ $('fotos').innerHTML='<p class="hint">Cargando fotos…</p>'; $('peso').textContent=''; return; }
+  const cols=coloresProducto().filter(c=>c!=='Único');
+  const grupos=cols.map(c=>({c, t:'Color '+c}));
+  // fotos de colores que ya no existen se muestran aparte para poder borrarlas
+  const conocidos=new Set(cols.map(canon));
+  const huerfanas=[...new Set(E.fotos.filter(f=>f.color && !conocidos.has(canon(f.color))).map(f=>f.color))];
+  huerfanas.forEach(c=>grupos.push({c, t:'Color '+c+(cols.length?' (ya no está en las filas)':'')}));
+  grupos.push({c:'', t: cols.length? 'Generales (con todos los colores)' : 'Fotos del producto'});
+  const de=c=>E.fotos.map((f,i)=>({f,i})).filter(x=> c===''? !x.f.color : (x.f.color && canon(x.f.color)===canon(c)));
+  $('fotos').innerHTML=grupos.map(g=>{ const fs=de(g.c);
+    return `<div class="fcol"><div class="t">${esc(g.t)}</div><div class="fotos">${fs.map((x,k)=>`<div class="ft"><img src="${esc(x.f.src)}" alt="">${k===0?'<span class="pt">Portada</span>':''}<div class="ac">${k>0?`<button type="button" title="Hacer portada" onclick="portada(${x.i})">★</button>`:''}<button type="button" title="Quitar" onclick="quitarFoto(${x.i})">✕</button></div></div>`).join('')}
+      ${fs.length<MAX_FOTOS?`<label class="add"><b>+</b>Subir foto<input type="file" accept="image/*" multiple data-c="${esc(g.c)}" onchange="subirFotos(this)"></label>`:''}</div></div>`; }).join('');
+  const peso=E.fotos.reduce((s,f)=>s+f.src.length,0);
+  $('peso').textContent=E.fotos.length? E.fotos.length+' foto(s) · '+Math.round(peso/1024)+' KB de '+Math.round(LIM_FOTOS/1024)+' KB'+(peso>LIM_FOTOS?' — al guardar se reducen solas':'') : '';
+}
+function portada(i){ const f=E.fotos[i]; const pi=E.fotos.findIndex(x=>canon(x.color)===canon(f.color)); E.fotos.splice(i,1); E.fotos.splice(pi,0,f); E.fotosCambiaron=true; pintarFotos(); }
+function quitarFoto(i){ E.fotos.splice(i,1); E.fotosCambiaron=true; pintarFotos(); }
+function comprimir(file, lado, cal){
+  return new Promise(res=>{ const img=new Image(); let url=null; const t=setTimeout(()=>res(null),30000);
+    img.onload=()=>{ clearTimeout(t); try{ const s=Math.min(1,lado/Math.max(img.width,img.height)); const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.width*s)); c.height=Math.max(1,Math.round(img.height*s)); const x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,c.width,c.height); x.drawImage(img,0,0,c.width,c.height); if(url) URL.revokeObjectURL(url); res(c.toDataURL('image/jpeg',cal)); }catch(e){ res(null); } };
+    img.onerror=()=>{ clearTimeout(t); if(url) URL.revokeObjectURL(url); res(null); };
+    if(typeof file==='string') img.src=file; else { url=URL.createObjectURL(file); img.src=url; } });
+}
+async function subirFotos(inp){
+  const files=[...inp.files]; const c=inp.dataset.c||''; inp.value='';
+  const grande=E.tienda==='fraganza'; let fallos=0;
+  for(const f of files){
+    const ya=E.fotos.filter(x=> c===''? !x.color : canon(x.color)===canon(c)).length; if(ya>=MAX_FOTOS){ toast('Máximo '+MAX_FOTOS+' fotos por color'); break; }
+    const d=await comprimir(f, grande?1500:900, grande?0.82:0.72);
+    if(d){ E.fotos.push({src:d, color:c}); E.fotosCambiaron=true; } else fallos++;
+  }
+  pintarFotos();
+  if(fallos) toast('⚠ '+fallos+' foto(s) no se pudieron abrir. Si es de iPhone (HEIC), tómale captura de pantalla y sube la captura.');
+}
+const mini=src=>comprimir(src,440,0.6);
+
+/* ---------- guardar ---------- */
+async function guardarProducto(){
+  if(!E) return; leerVariantes();
+  const nombre=limpiarTx($('e-nombre').value,80);
+  if(nombre.length<2){ toast('Escribe el nombre del producto'); $('e-nombre').focus(); return; }
+  if(!E.variantes.length){ const pr=parseFloat($('e-precio').value)||0; if(!pr){ toast('Agrega al menos una fila con precio y stock'); return; } E.variantes.push({id:nuevoId(), talla:'', color:'', precio:pr, stock:0}); }
+  if(E.variantes.some(v=>!(v.precio>0))){ toast('Hay filas sin precio'); return; }
+  const dup=new Set(); for(const v of E.variantes){ const k=canon(v.talla||'Única')+'|'+canon(v.color||'Único'); if(dup.has(k)){ toast('La combinación '+(v.talla||'Única')+' / '+(v.color||'Único')+' está repetida'); return; } dup.add(k); }
+  const pct=Math.round(Math.min(90,Math.max(0,parseFloat($('e-dsc').value)||0))), hasta=$('e-hasta').value;
+  if(pct && hasta && finDelDiaMs(hasta)<Date.now()){ toast('La fecha del descuento ya pasó'); return; }
+  const b=$('e-guardar'); b.disabled=true; b.textContent='Guardando…';
+  try{
+    const ref=refT(E.tienda), p=E.orig||{};
+    const variantes=E.variantes.map(v=>{ const x={id:v.id, talla:limpiarTx(v.talla,20)||'Única', color:limpiarTx(v.color,30)||'Único', precio:conDescuento(v.precio,pct), stock:Math.max(0,v.stock|0)}; if(pct && x.precio<v.precio) x.precioAntes=v.precio; return x; });
+    const precios=variantes.map(v=>v.precio).filter(x=>x>0);
+    const doc={ id:E.id, nombre, categoria:limpiarTx($('e-cat').value,40), descripcion:String($('e-desc').value||'').replace(/[<>`]/g,'').trim().slice(0,600),
+      precio:precios.length?Math.min(...precios):0, variantes, oculto:!$('e-vis').checked,
+      tendencia: $('e-tend').checked? (p.tendencia>0? p.tendencia : Date.now()) : 0,
+      publicadoEn: p.publicadoEn || ($('e-vis').checked? Date.now() : 0),
+      thumb:p.thumb||'', fotosColor:p.fotosColor||{}, nFotos:p.nFotos||0, fotosV:p.fotosV||0, v:3, actualizado:Date.now() };
+    if(pct && variantes.some(v=>v.precioAntes)){ const barata=variantes.reduce((m,v)=>v.precio<m.precio?v:m); doc.descuento=pct; doc.precioAntes=barata.precioAntes||0; doc.descHasta=finDelDiaMs(hasta); }
+    else { doc.descuento=0; doc.precioAntes=0; doc.descHasta=0; }
+    const batch=db.batch();
+    if(E.fotosCargadas && (E.fotosCambiaron || E.nuevo)){
+      // fotos de un color cuyo nombre cambió en las filas: se quedan con el color nuevo si era el único
+      let fotos=E.fotos.map(f=>({src:f.src, color:f.color||''}));
+      const peso=()=>fotos.reduce((s,f)=>s+f.src.length,0);
+      for(const [lado,cal] of [[1200,0.75],[1000,0.7],[800,0.66],[700,0.6],[600,0.55],[520,0.5]]){ if(peso()<=LIM_FOTOS) break; fotos=await Promise.all(fotos.map(async f=>({src:(await comprimir(f.src,lado,cal))||f.src, color:f.color}))); }
+      if(peso()>LIM_FOTOS){ toast('Las fotos pesan demasiado juntas. Quita una y vuelve a guardar.'); return; }
+      const cols=coloresProducto().filter(c=>c!=='Único');
+      const orden=[...cols.map(c=>fotos.filter(f=>f.color && canon(f.color)===canon(c))), fotos.filter(f=>!f.color || !cols.some(c=>canon(c)===canon(f.color)))].flat();
+      batch.set(ref.collection('fotos').doc(E.id), {imgs:orden.map(f=>f.src), colores:orden.map(f=>f.color), actualizado:Date.now(), v:3});
+      doc.nFotos=orden.length; doc.fotosV=(p.fotosV||0)+1;
+      doc.thumb= orden.length? ((await mini(orden[0].src))||orden[0].src) : '';
+      const fc={}; for(const c of cols){ const f=orden.find(x=>x.color && canon(x.color)===canon(c)); if(f) fc[c]=(await mini(f.src))||f.src; }
+      doc.fotosColor= Object.keys(fc).length>1? fc : {};
+    }
+    batch.set(ref.collection('productos').doc(E.id), doc);
+    await batch.commit();
+    toast(E.nuevo? 'Producto creado' : 'Cambios guardados'); cerrarEditor();
+  }catch(e){ console.error(e); toast(e&&e.code==='permission-denied'? '⚠ Firebase no dio permiso. Revisa las reglas (pestaña Seguridad).' : '⚠ No se pudo guardar. Revisa tu conexión y vuelve a intentar.'); }
+  finally{ b.disabled=false; b.textContent='Guardar'; }
+}
+async function borrarProducto(){
+  if(!E||E.nuevo) return;
+  if(!confirm('¿Eliminar "'+(E.orig.nombre||'')+'" de la tienda con sus fotos? No se puede deshacer.\n\nSi solo quieres que no se vea por un tiempo, mejor desmarca "Visible en la tienda".')) return;
+  try{ const ref=refT(E.tienda), b=db.batch(); b.delete(ref.collection('productos').doc(E.id)); b.delete(ref.collection('fotos').doc(E.id)); await b.commit(); toast('Producto eliminado'); cerrarEditor(); }
+  catch(e){ console.error(e); toast('⚠ No se pudo eliminar ('+(e.code||e.message)+')'); }
+}
+
+/* ---------- configuración ---------- */
+async function cargarConfig(){
+  $('c-medios').innerHTML=MEDIOS.map(m=>`<label class="chk"><input type="checkbox" value="${m.id}"> ${esc(m.label)}</label>`).join('');
+  let c={};
+  try{ const d=await refT(tienda).collection('config').doc('publica').get(); c=d.exists? d.data() : {}; }catch(e){ console.error(e); toast('No se pudo leer la configuración'); }
+  $('c-abierta').checked= c.abierta===undefined ? true : !!c.abierta;
+  $('c-whatsapp').value=c.whatsapp||'573128556822'; $('c-dir').value=c.direccionTienda||'Centro Comercial Plaza Malambo, Malambo - Atlántico';
+  $('c-aviso').value=c.aviso||''; $('c-datos').value=c.datosPago||''; $('c-tiempo').value=c.tiempoEnvio||'';
+  $('c-envio').checked=!!c.envioActivo; $('c-retiro').checked=c.retiroEnTienda!==false;
+  $('c-costo').value=c.costoEnvio||0; $('c-gratis').value=c.envioGratisDesde||0;
+  const ids=(c.medios||[{id:'transferencia'},{id:'tienda'}]).map(m=>m.id);
+  document.querySelectorAll('#c-medios input').forEach(i=>i.checked=ids.includes(i.value));
+}
+async function guardarConfig(){
+  let wa=$('c-whatsapp').value.replace(/\D/g,''); if(wa.length===10) wa='57'+wa;
+  const medios=[...document.querySelectorAll('#c-medios input:checked')].map(i=>MEDIOS.find(m=>m.id===i.value)).map(m=>({id:m.id,label:m.label}));
+  if(!medios.length){ toast('Elige al menos un medio de pago'); return; }
+  if(!$('c-envio').checked && !$('c-retiro').checked){ toast('Elige al menos una forma de entrega'); return; }
+  const doc={ nombre:TIENDAS[tienda].nombre, tiendaId:tienda, whatsapp:wa, abierta:$('c-abierta').checked, aviso:limpiarTx($('c-aviso').value,160), tiempoEnvio:limpiarTx($('c-tiempo').value,80),
+    medios, datosPago:String($('c-datos').value||'').replace(/[<>`]/g,'').trim().slice(0,500), envioActivo:$('c-envio').checked, retiroEnTienda:$('c-retiro').checked,
+    costoEnvio:Math.max(0,Number($('c-costo').value)||0), envioGratisDesde:Math.max(0,Number($('c-gratis').value)||0), direccionTienda:limpiarTx($('c-dir').value,120), v:3 };
+  try{ await refT(tienda).collection('config').doc('publica').set(doc); toast('Configuración de '+TIENDAS[tienda].nombre+' guardada'); }
+  catch(e){ console.error(e); toast('⚠ No se pudo guardar ('+(e.code||e.message)+')'); }
+}
+
+/* ---------- importar desde el proyecto anterior ---------- */
+async function importar(){
+  const cfg=parsearCfg($('im-cfg').value)||ORIGEN_DEF, code=$('im-code').value.trim()||'regia2026', sobre=$('im-sobre').checked;
+  if(cfg.projectId===CFGT.firebaseConfig.projectId && code===CFGT.storeCode){ toast('El origen y el destino son el mismo'); return; }
+  const log=$('im-log'); log.hidden=false; log.textContent='';
+  const L=m=>{ log.textContent+=m+'\n'; log.scrollTop=log.scrollHeight; };
+  const btn=$('im-btn'); btn.disabled=true;
+  try{
+    const app=firebase.apps.find(a=>a.name==='origen') || firebase.initializeApp(cfg,'origen');
+    const odb=app.firestore();
+    const oRef=t=>odb.collection('tiendas').doc(t==='fraganza'? code+'-fraganza' : code);
+    let total=0, saltados=0, fotosN=0;
+    for(const t of ['regia','fraganza']){
+      L('— '+TIENDAS[t].nombre+' —');
+      try{ const c=await oRef(t).collection('config').doc('publica').get();
+        if(c.exists){ const yaC=await refT(t).collection('config').doc('publica').get(); if(!yaC.exists || sobre){ await refT(t).collection('config').doc('publica').set(Object.assign({}, c.data(), {v:3})); L('Configuración copiada'); } else L('Configuración: ya existía, se dejó la actual'); } }
+      catch(e){ L('⚠ Configuración: '+(e.code||e.message)); }
+      const snap=await oRef(t).collection('productos').get();
+      const existentes=new Set(PRODS[t].map(p=>p.id));
+      for(const d of snap.docs){
+        const p=d.data(); if(!p || p.oculto || !p.nombre || !Array.isArray(p.variantes)) continue;
+        if(existentes.has(d.id) && !sobre){ saltados++; continue; }
+        let fotos=null;
+        try{ const f=await oRef(t).collection('fotos').doc(d.id).get(); if(f.exists && (f.data().imgs||[]).length) fotos=f.data();
+          if(!fotos && t==='fraganza'){ const f2=await oRef('regia').collection('fotos').doc(d.id).get(); if(f2.exists && (f2.data().imgs||[]).length) fotos=f2.data(); } }
+        catch(e){ L('⚠ Fotos de '+p.nombre+': '+(e.code||e.message)); }
+        const b=db.batch();
+        const doc=Object.assign({}, p, {id:d.id, oculto:false, v:3, actualizado:Date.now(), importado:Date.now()});
+        if(fotos){ b.set(refT(t).collection('fotos').doc(d.id), {imgs:fotos.imgs||[], colores:fotos.colores||[], actualizado:Date.now(), v:3}); doc.nFotos=(fotos.imgs||[]).length; fotosN+=doc.nFotos; }
+        b.set(refT(t).collection('productos').doc(d.id), doc);
+        try{ await b.commit(); total++; L('✓ '+p.nombre+(fotos?' ('+(fotos.imgs||[]).length+' fotos)':'')); }
+        catch(e){ L('⚠ '+p.nombre+': '+(e.code||e.message)); }
+      }
+    }
+    L('\nListo: '+total+' producto(s) importados, '+fotosN+' foto(s)'+(saltados?', '+saltados+' ya existían y se dejaron igual':'')+'.');
+    toast('Importación terminada');
+  }catch(e){ console.error(e); L('⚠ No se pudo leer la tienda anterior: '+(e.code||e.message)); }
+  finally{ btn.disabled=false; }
+}
+
+/* ---------- seguridad ---------- */
+function reglas(){
+  const e=((usuario&&usuario.email)||'TU_CORREO').replace(/'/g,'');
+  return `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function esAdmin() {
+      return request.auth != null && request.auth.token.email == '${e}';
+    }
+    // Catálogo, fotos y configuración: todos pueden verlos, solo tú los cambias
+    match /tiendas/{codigo}/{coleccion}/{doc} {
+      allow read: if coleccion in ['config', 'productos', 'fotos'];
+      allow write: if esAdmin();
+    }
+  }
+}`;
+}
+function pintarReglas(){ $('reglas').textContent=reglas(); }
+async function copiarReglas(){ try{ await navigator.clipboard.writeText(reglas()); toast('Reglas copiadas'); }catch(e){ toast('Selecciona el texto y cópialo'); } }
+function descargarConfig(){
+  const fc={}; ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{ if(CFGT.firebaseConfig[k]) fc[k]=CFGT.firebaseConfig[k]; });
+  const txt='// Conexión de la tienda en línea (proyecto propio de la tienda). Súbelo a GitHub junto a tienda.html\nwindow.TIENDA_CONFIG='+JSON.stringify({firebaseConfig:fc, storeCode:CFGT.storeCode},null,2)+';\n';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/javascript'})); a.download='tienda-config.js'; document.body.appendChild(a); a.click(); a.remove();
+}
+iniciar();
+</script>
+</body>
+</html>
