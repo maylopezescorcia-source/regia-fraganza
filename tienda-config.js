@@ -1,13 +1,12 @@
-// Conexión de la tienda en línea (proyecto de Firebase PROPIO de la tienda, separado del sistema de facturación).
-// Reemplaza los valores PEGA_AQUI por los de tu proyecto nuevo: Firebase → Configuración del proyecto → Tus apps → Web.
+// Conexión de la tienda en línea (generado por tu sistema). Súbelo a GitHub junto a tienda.html
 window.TIENDA_CONFIG={
   "firebaseConfig": {
-    "apiKey": "PEGA_AQUI",
-    "authDomain": "PEGA_AQUI",
-    "projectId": "PEGA_AQUI",
-    "storageBucket": "PEGA_AQUI",
-    "messagingSenderId": "PEGA_AQUI",
-    "appId": "PEGA_AQUI"
+    "apiKey": "AIzaSyDZBSJ_NftnTGlPDQhY5a8ARQVPzbp0_Mc",
+    "authDomain": "regia-bf53e.firebaseapp.com",
+    "projectId": "regia-bf53e",
+    "storageBucket": "regia-bf53e.firebasestorage.app",
+    "messagingSenderId": "412942412923",
+    "appId": "1:412942412923:web:dbf9d91869dcaa629346de"
   },
   "storeCode": "regia2026"
 };
