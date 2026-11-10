@@ -73,6 +73,15 @@
   .vt .stk button,.x{border:1px solid var(--line);background:#fff;border-radius:8px;width:36px;height:40px;cursor:pointer;font-weight:700;flex:0 0 auto}
   @media(max-width:560px){ .vt thead{display:none} .vt tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:8px} .vt td{padding:0;min-width:0} .vt .stk input{width:auto;flex:1;min-width:0} .vt td.del{margin-top:-2px} .vt td.pr,.vt td.st{grid-column:span 1} .vt td.del{grid-column:span 2;text-align:right} .vt td::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--soft);font-weight:600} }
   .gen{background:var(--wash);border-radius:12px;padding:10px 12px;margin-top:10px}
+  .perf .pv{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1fr) 90px 40px;gap:6px;align-items:center;margin-top:8px}
+  .perf .pv input[type=text],.perf .pv input[type=number]{min-height:40px;padding:8px;min-width:0}
+  .perf .pv .nv{font-weight:600;display:flex;align-items:center;gap:6px;font-size:14px}
+  .perf .pv .nv input{width:20px;height:20px;accent-color:var(--acc,#8A5A2B)}
+  .perf .pvh{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1fr) 90px 40px;gap:6px;font-size:11.5px;color:var(--soft);font-weight:600;margin-top:8px}
+  .perf .dsep{border-top:1px dashed var(--line);margin-top:10px;padding-top:2px}
+  .perf .off{opacity:.45}
+  .perf .c{display:block;min-width:0;margin:0} .perf .c small{display:none;font-size:11.5px;color:var(--soft);font-weight:600;margin-bottom:2px} .perf .c input{width:100%}
+  @media(max-width:560px){ .perf .pvh{display:none} .perf .pv{grid-template-columns:minmax(0,1fr) minmax(0,1fr);border:1px solid var(--line);border-radius:12px;padding:8px;background:#fff} .perf .pv .nv{grid-column:1/-1} .perf .pv > .hint{grid-column:1/-1 !important} .perf .c small{display:block} .perf .pv .x{align-self:end} .perf .pv input::placeholder{color:#9a8f86} }
   .fotos{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
   .ft{position:relative;width:92px;height:115px;border-radius:10px;overflow:hidden;background:var(--wash);border:1px solid var(--line)}
   .ft img{width:100%;height:100%;object-fit:cover} .ft .pt{position:absolute;left:4px;bottom:4px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px}
@@ -225,7 +234,7 @@
       <input type="text" id="e-nombre" maxlength="80">
       <div class="row2">
         <div><label class="l" for="e-cat">Categoría</label><input type="text" id="e-cat" list="cats" maxlength="40"><datalist id="cats"></datalist></div>
-        <div><label class="l" for="e-precio">Precio normal</label><input type="number" id="e-precio" min="0" step="100" placeholder="Para todas las tallas y colores"></div>
+        <div id="w-precio"><label class="l" for="e-precio">Precio normal</label><input type="number" id="e-precio" min="0" step="100" placeholder="Para todas las tallas y colores"></div>
       </div>
       <label class="l" for="e-desc">Descripción</label>
       <textarea id="e-desc" maxlength="600" placeholder="Material, cómo horma, cuidados…"></textarea>
@@ -237,9 +246,20 @@
       </div>
 
       <div class="sec">
-        <h3>Tallas, colores y stock</h3>
-        <p class="hint">Cada fila es una combinación talla + color con sus unidades disponibles. Cuando vendas por WhatsApp o en el local, baja aquí las unidades.</p>
-        <div class="gen">
+        <h3 id="sec-tit">Tallas, colores y stock</h3>
+        <p class="hint" id="sec-hint">Cada fila es una combinación talla + color con sus unidades disponibles. Cuando vendas por WhatsApp o en el local, baja aquí las unidades.</p>
+        <div class="gen perf" id="perf" hidden>
+          <p class="hint" style="margin-top:0">Marca las versiones que vendes de este perfume y ponle precio a cada una. En la tienda el cliente elige <b>Original</b>, <b>1.1</b> o <b>Decant</b>, y luego el tamaño.</p>
+          <div class="pvh"><span>Versión</span><span>Tamaño</span><span>Precio</span><span>Unidades</span><span></span></div>
+          <div class="pv" id="pv-o"><label class="nv"><input type="checkbox" class="ck"> Original</label><label class="c"><small>Tamaño</small><input type="text" class="ml" placeholder="Tamaño, ej. 100 ml" maxlength="20"></label><label class="c"><small>Precio</small><input type="number" class="pr" min="0" step="100" placeholder="Precio"></label><label class="c"><small>Unidades</small><input type="number" class="st" min="0" placeholder="Und."></label><span></span></div>
+          <div class="pv" id="pv-r"><label class="nv"><input type="checkbox" class="ck"> 1.1</label><label class="c"><small>Tamaño</small><input type="text" class="ml" placeholder="Tamaño, ej. 100 ml" maxlength="20"></label><label class="c"><small>Precio</small><input type="number" class="pr" min="0" step="100" placeholder="Precio"></label><label class="c"><small>Unidades</small><input type="number" class="st" min="0" placeholder="Und."></label><span></span></div>
+          <div class="dsep"><div class="pv" style="margin-top:6px"><label class="nv"><input type="checkbox" id="pv-d"> Decants</label><span class="hint" style="grid-column:2/-1;margin:0">Cada tamaño con su precio (ej. 5 ml, 10 ml).</span></div>
+            <div id="pv-dec"></div>
+            <button type="button" class="btn ghost sm" id="pv-dadd" onclick="agregarDecant()" style="margin-top:6px">+ Otro tamaño de decant</button></div>
+          <button type="button" class="btn acc sm" onclick="aplicarPerfume()" style="margin-top:12px">Pasar a la tabla</button>
+          <p class="hint">Al guardar se pasa solo. La tabla de abajo muestra el resultado; ahí también puedes subir o bajar unidades.</p>
+        </div>
+        <div class="gen" id="gen-ropa">
           <div class="row2">
             <div><label class="l" for="g-tallas" style="margin-top:0">Tallas</label><input type="text" id="g-tallas" placeholder="S, M, L, XL"></div>
             <div><label class="l" for="g-colores" style="margin-top:0">Colores</label><input type="text" id="g-colores" placeholder="Negro, Blanco"></div>
@@ -404,7 +424,13 @@ async function abrirEditor(id){
   $('g-tallas').value=''; $('g-colores').value=''; $('g-stock').value=0;
   $('e-borrar').hidden=!p; $('e-guardar').disabled=false;
   $('cats').innerHTML=[...new Set(PRODS[tienda].map(x=>x.categoria).filter(Boolean))].sort().map(c=>`<option value="${esc(c)}">`).join('');
-  pintarVariantes(); pintarFotos();
+  const perf=tienda==='fraganza';
+  $('perf').hidden=!perf; $('gen-ropa').hidden=perf; $('w-precio').hidden=perf;
+  $('sec-tit').textContent=perf? 'Versiones, tamaños y stock' : 'Tallas, colores y stock';
+  $('sec-hint').textContent=perf? 'Cuando vendas por WhatsApp o en el local, baja aquí las unidades.' : 'Cada fila es una combinación talla + color con sus unidades disponibles. Cuando vendas por WhatsApp o en el local, baja aquí las unidades.';
+  document.querySelectorAll('.vt thead th')[0].textContent=perf?'Tamaño':'Talla';
+  document.querySelectorAll('.vt thead th')[1].textContent=perf?'Versión':'Color';
+  pintarVariantes(); pintarFotos(); pintarPerfume();
   $('ed').classList.add('on'); document.body.style.overflow='hidden'; $('ed').scrollTop=0;
   if(p){
     try{ const d=await refT(tienda).collection('fotos').doc(p.id).get(); if(!E||E.id!==p.id) return;
@@ -425,16 +451,17 @@ function leerVariantes(){
     v.precio=Math.max(0,parseFloat(tr.querySelector('.ip').value)||0); v.stock=Math.max(0,parseInt(tr.querySelector('.is').value,10)||0); });
 }
 function pintarVariantes(){
+  const pf=E.tienda==='fraganza';
   $('vt').innerHTML=E.variantes.map((v,i)=>`<tr data-i="${i}">
-    <td data-l="Talla"><input type="text" class="it" value="${esc(v.talla)}" placeholder="Única"></td>
-    <td data-l="Color"><input type="text" class="ic" value="${esc(v.color)}" placeholder="Único" onchange="leerVariantes();pintarFotos()"></td>
+    <td data-l="${pf?'Tamaño':'Talla'}"><input type="text" class="it" value="${esc(v.talla)}" placeholder="Única"></td>
+    <td data-l="${pf?'Versión':'Color'}"><input type="text" class="ic" value="${esc(v.color)}" placeholder="Único" onchange="leerVariantes();pintarFotos()"></td>
     <td class="pr" data-l="Precio"><input class="ip" type="number" min="0" step="100" value="${v.precio||''}"></td>
     <td class="st" data-l="Stock"><div class="stk"><button type="button" onclick="pasoStock(${i},-1)" aria-label="Menos">−</button><input class="is" type="number" min="0" value="${v.stock}"><button type="button" onclick="pasoStock(${i},1)" aria-label="Más">+</button></div></td>
     <td class="del"><button type="button" class="x" onclick="quitarFila(${i})" aria-label="Quitar fila">🗑</button></td></tr>`).join('')
     || '<tr><td colspan="5" class="hint" style="padding:10px 4px">Sin filas todavía. Usa "Agregar combinaciones" o "+ Agregar una fila".</td></tr>';
 }
-function pasoStock(i,d){ leerVariantes(); const v=E.variantes[i]; v.stock=Math.max(0,v.stock+d); pintarVariantes(); }
-function quitarFila(i){ leerVariantes(); E.variantes.splice(i,1); pintarVariantes(); pintarFotos(); }
+function pasoStock(i,d){ leerVariantes(); const v=E.variantes[i]; v.stock=Math.max(0,v.stock+d); pintarVariantes(); if(E.tienda==='fraganza' && !E.perfSucio) pintarPerfume(); }
+function quitarFila(i){ leerVariantes(); E.variantes.splice(i,1); pintarVariantes(); pintarFotos(); if(E.tienda==='fraganza' && !E.perfSucio) pintarPerfume(); }
 function agregarFila(){ leerVariantes(); E.variantes.push({id:nuevoId(), talla:'', color:'', precio:parseFloat($('e-precio').value)||0, stock:0}); pintarVariantes(); }
 function generarVariantes(){
   leerVariantes();
@@ -445,7 +472,59 @@ function generarVariantes(){
     E.variantes.push({id:nuevoId(), talla:t, color:c, precio:pr, stock:st}); n++; }));
   pintarVariantes(); pintarFotos(); toast(n? n+' combinación(es) agregada(s)' : 'Esas combinaciones ya estaban');
 }
-$('e-precio').addEventListener('change',()=>{ const pr=parseFloat($('e-precio').value)||0; if(!pr||!E) return; leerVariantes(); E.variantes.forEach(v=>v.precio=pr); pintarVariantes(); });
+$('e-precio').addEventListener('change',()=>{ const pr=parseFloat($('e-precio').value)||0; if(!pr||!E||E.tienda==='fraganza') return; leerVariantes(); E.variantes.forEach(v=>v.precio=pr); pintarVariantes(); });
+
+/* ---------- perfumes: Original, 1.1 y decants ---------- */
+// En Fraganza cada fila guarda la versión en "color" (Original / 1.1 / Decant) y el tamaño en "talla" (100 ml, 5 ml…)
+const VER={o:'Original', r:'1.1', d:'Decant'};
+const verDe=c=>{ const k=canon(c); return k==='original'?'o' : (k==='1.1'||k==='11'||k==='1,1'||k==='replica 1.1')?'r' : (k==='decant'||k==='decants')?'d' : ''; };
+const mlTx=t=>{ t=limpiarTx(t,20); const m=t.match(/^(\d+(?:[.,]\d+)?)\s*(ml)?$/i); return m? m[1].replace(',','.')+' ml' : t; };
+const mlNum=t=>parseFloat(String(t||'').replace(',','.'))||0;
+function filaDecant(d){ return `<div class="pv dr"><span class="nv hint" style="font-weight:400;margin:0">Decant</span><label class="c"><small>Tamaño</small><input type="text" class="ml" placeholder="Tamaño, ej. 5 ml" maxlength="20" value="${esc(d.ml||'')}"></label><label class="c"><small>Precio</small><input type="number" class="pr" min="0" step="100" placeholder="Precio" value="${d.pr||''}"></label><label class="c"><small>Unidades</small><input type="number" class="st" min="0" placeholder="Und." value="${d.st!=null&&d.st!==''?d.st:''}"></label><button type="button" class="x" onclick="this.closest('.dr').remove();E.perfSucio=true" aria-label="Quitar tamaño">🗑</button></div>`; }
+function agregarDecant(){ $('pv-dec').insertAdjacentHTML('beforeend', filaDecant({})); $('pv-d').checked=true; E.perfSucio=true; marcarPerfume(); }
+function marcarPerfume(){ ['o','r'].forEach(k=>{ const r=$('pv-'+k); r.classList.toggle('off', !r.querySelector('.ck').checked); }); $('pv-dec').classList.toggle('off', !$('pv-d').checked); }
+function pintarPerfume(){
+  if(!E || E.tienda!=='fraganza') return;
+  ['o','r'].forEach(k=>{ const r=$('pv-'+k), v=E.variantes.find(x=>verDe(x.color)===k);
+    r.querySelector('.ck').checked=!!v; r.querySelector('.ml').value=v?v.talla:''; r.querySelector('.pr').value=v&&v.precio?v.precio:''; r.querySelector('.st').value=v?v.stock:''; });
+  const ds=E.variantes.filter(x=>verDe(x.color)==='d').sort((a,b)=>mlNum(a.talla)-mlNum(b.talla));
+  $('pv-d').checked=ds.length>0;
+  $('pv-dec').innerHTML=(ds.length? ds.map(v=>({ml:v.talla,pr:v.precio,st:v.stock})) : [{ml:'5 ml'},{ml:'10 ml'}]).map(filaDecant).join('');
+  E.perfSucio=false; marcarPerfume();
+}
+// Pasa lo escrito en el bloque de versiones a la tabla. Devuelve false si falta algo.
+function aplicarPerfume(silencio){
+  if(!E || E.tienda!=='fraganza') return true;
+  leerVariantes();
+  const quiero=[];
+  for(const k of ['o','r']){ const r=$('pv-'+k); if(!r.querySelector('.ck').checked) continue;
+    const pr=parseFloat(r.querySelector('.pr').value)||0;
+    if(!(pr>0)){ toast('Ponle precio a la versión '+VER[k]); r.querySelector('.pr').focus(); return false; }
+    quiero.push({k, talla:mlTx(r.querySelector('.ml').value), precio:pr, stock:Math.max(0,parseInt(r.querySelector('.st').value,10)||0)}); }
+  if($('pv-d').checked){ let n=0;
+    for(const r of document.querySelectorAll('#pv-dec .dr')){ const ml=mlTx(r.querySelector('.ml').value), pr=parseFloat(r.querySelector('.pr').value)||0;
+      if(!ml && !pr) continue;
+      if(!ml){ toast('Escribe el tamaño del decant (ej. 5 ml)'); r.querySelector('.ml').focus(); return false; }
+      if(!(pr>0)){ toast('Ponle precio al decant de '+ml); r.querySelector('.pr').focus(); return false; }
+      if(quiero.some(q=>q.k==='d'&&canon(q.talla)===canon(ml))){ toast('El decant de '+ml+' está repetido'); return false; }
+      quiero.push({k:'d', talla:ml, precio:pr, stock:Math.max(0,parseInt(r.querySelector('.st').value,10)||0)}); n++; }
+    if(!n){ toast('Agrega al menos un tamaño de decant con su precio, o desmarca Decants'); return false; } }
+  // las filas de versiones se reemplazan por lo del bloque (conservando su id); las demás filas no se tocan
+  const viejas=E.variantes.filter(v=>verDe(v.color));
+  const otras=E.variantes.filter(v=>!verDe(v.color) && (v.talla||v.color));
+  const nuevas=quiero.map(q=>{ const ya=viejas.find(v=>verDe(v.color)===q.k && canon(v.talla)===canon(q.talla)) || (q.k!=='d' && viejas.find(v=>verDe(v.color)===q.k));
+    return {id:ya?ya.id:nuevoId(), talla:q.talla, color:VER[q.k], precio:q.precio, stock:q.stock}; });
+  if(!nuevas.length && !otras.length){ if(!silencio) toast('Marca al menos una versión: Original, 1.1 o Decants'); return silencio? 'vacio' : false; }
+  const orden=v=>({o:0,r:1,d:2})[verDe(v.color)];
+  nuevas.sort((a,b)=>orden(a)-orden(b) || mlNum(a.talla)-mlNum(b.talla));
+  E.variantes=[...nuevas, ...otras]; E.perfSucio=false;
+  pintarVariantes(); pintarFotos();
+  if(!silencio) toast(nuevas.length+' versión(es) en la tabla');
+  return true;
+}
+$('perf').addEventListener('input',()=>{ if(E) E.perfSucio=true; });
+$('perf').addEventListener('change',e=>{ if(E) E.perfSucio=true; marcarPerfume(); });
+$('vt').addEventListener('change',()=>{ if(E && E.tienda==='fraganza' && !E.perfSucio){ leerVariantes(); pintarPerfume(); } });
 
 /* ---------- fotos ---------- */
 function coloresProducto(){ const m=new Map(); E.variantes.forEach(v=>{ const c=v.color||'Único'; if(!m.has(canon(c))) m.set(canon(c),c); }); return [...m.values()]; }
@@ -453,12 +532,12 @@ function pintarFotos(){
   if(!E) return;
   if(!E.fotosCargadas){ $('fotos').innerHTML='<p class="hint">Cargando fotos…</p>'; $('peso').textContent=''; return; }
   const cols=coloresProducto().filter(c=>c!=='Único');
-  const grupos=cols.map(c=>({c, t:'Color '+c}));
+  const pal=E.tienda==='fraganza'?'Versión ':'Color '; const grupos=cols.map(c=>({c, t:pal+c}));
   // fotos de colores que ya no existen se muestran aparte para poder borrarlas
   const conocidos=new Set(cols.map(canon));
   const huerfanas=[...new Set(E.fotos.filter(f=>f.color && !conocidos.has(canon(f.color))).map(f=>f.color))];
-  huerfanas.forEach(c=>grupos.push({c, t:'Color '+c+(cols.length?' (ya no está en las filas)':'')}));
-  grupos.push({c:'', t: cols.length? 'Generales (con todos los colores)' : 'Fotos del producto'});
+  huerfanas.forEach(c=>grupos.push({c, t:pal+c+(cols.length?' (ya no está en las filas)':'')}));
+  grupos.push({c:'', t: cols.length? (E.tienda==='fraganza'?'Generales (para todas las versiones)':'Generales (con todos los colores)') : 'Fotos del producto'});
   const de=c=>E.fotos.map((f,i)=>({f,i})).filter(x=> c===''? !x.f.color : (x.f.color && canon(x.f.color)===canon(c)));
   $('fotos').innerHTML=grupos.map(g=>{ const fs=de(g.c);
     return `<div class="fcol"><div class="t">${esc(g.t)}</div><div class="fotos">${fs.map((x,k)=>`<div class="ft"><img src="${esc(x.f.src)}" alt="">${k===0?'<span class="pt">Portada</span>':''}<div class="ac">${k>0?`<button type="button" title="Hacer portada" onclick="portada(${x.i})">★</button>`:''}<button type="button" title="Quitar" onclick="quitarFoto(${x.i})">✕</button></div></div>`).join('')}
@@ -490,6 +569,11 @@ const mini=src=>comprimir(src,440,0.6);
 /* ---------- guardar ---------- */
 async function guardarProducto(){
   if(!E) return; leerVariantes();
+  if(E.tienda==='fraganza'){
+    const r= E.perfSucio || !E.variantes.length ? aplicarPerfume(true) : true;
+    if(r===false) return;
+    if(!E.variantes.length){ toast('Marca al menos una versión: Original, 1.1 o Decants, con su precio'); return; }
+  }
   const nombre=limpiarTx($('e-nombre').value,80);
   if(nombre.length<2){ toast('Escribe el nombre del producto'); $('e-nombre').focus(); return; }
   if(!E.variantes.length){ const pr=parseFloat($('e-precio').value)||0; if(!pr){ toast('Agrega al menos una fila con precio y stock'); return; } E.variantes.push({id:nuevoId(), talla:'', color:'', precio:pr, stock:0}); }

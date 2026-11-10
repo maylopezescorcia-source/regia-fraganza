@@ -217,7 +217,7 @@
   .visor .vt{position:fixed;top:20px;left:16px;color:#fff;font-size:13px;opacity:.8;}
 </style>
 <script>window.MK_TIENDA='fraganza';</script>
-<script src="tienda-marketing.js?v=20261022e"></script>
+<script src="tienda-marketing.js?v=20261110a"></script>
 </head>
 <body>
 <div id="aviso" class="aviso" hidden></div>
@@ -336,6 +336,20 @@ function aplicarConfig(){
 /* ---------- catálogo ---------- */
 function stockTotal(p){ return p.variantes.reduce((s,v)=>s+v.stock,0); }
 function pintarEsqueleto(){ $('grid').innerHTML=Array.from({length:8}).map(()=>'<div class="card skeleton"><div class="ph"></div><div class="nm">&nbsp;</div></div>').join(''); }
+// Versiones de perfume: Original, 1.1 y Decant (el sistema las guarda en el campo color; el tamaño va en talla)
+const ORDEN_VER={'original':0,'1.1':1,'decant':2,'decants':2};
+const ordVer=c=>{ const k=String(c||'').toLowerCase().trim(); return k in ORDEN_VER? ORDEN_VER[k] : 9; };
+const mlDe=t=>{ const m=String(t||'').match(/(\d+(?:[.,]\d+)?)/); return m? parseFloat(m[1].replace(',','.')) : 1e9; };
+const ordenarVer=l=>l.slice().sort((a,b)=>ordVer(a)-ordVer(b));
+const ordenarMl=l=>l.slice().sort((a,b)=>mlDe(a)-mlDe(b));
+// "Desde $X" cuando el perfume tiene precios distintos (ej. decants y frasco completo)
+function precioCard(p, vs){
+  vs=(vs||p.variantes).filter(v=>v.precio>0);
+  const dist=new Set(vs.map(v=>v.precio)).size>1;
+  const min=vs.length? vs.reduce((m,v)=>v.precio<m.precio?v:m) : null;
+  const html=min? precioHtml(min.precio, min.precioAntes>min.precio?min.precioAntes:0) : precioHtml(p.precio, enOferta(p)?p.precioAntes:0);
+  return (dist?'<span style="font-size:.78em;font-weight:400;color:var(--soft)">Desde </span>':'')+html;
+}
 function render(){
   if(!cargado) return;
   MKF('setProds',PRODS);
@@ -352,11 +366,12 @@ function render(){
   }
   $('grid').innerHTML=lista.map(p=>{
     const st=stockTotal(p), agotado=st<=0;
-    const tallas=[...new Set(p.variantes.filter(v=>v.stock>0).map(v=>v.talla))].filter(t=>t!=='Única');
+    const vers=ordenarVer([...new Set(p.variantes.filter(v=>v.stock>0).map(v=>v.color))].filter(c=>c!=='Único'));
+    const tallas=vers.length? vers : ordenarMl([...new Set(p.variantes.filter(v=>v.stock>0).map(v=>v.talla))].filter(t=>t!=='Única'));
     return `<button class="card ${agotado?'agotado':''}" data-id="${esc(p.id)}" aria-label="${esc(nom(p.nombre))}, ${fmt(p.precio)}">
       <div class="ph ${p.thumb?'':'vacio'}">${p.thumb?`<img src="${esc(p.thumb)}" alt="${esc(nom(p.nombre))}" loading="lazy">`:`<img src="${LOGO}" alt="">`}
       ${window.MK?MK.etiqueta(p):(agotado?'<span class="tag">Agotado</span>':'')}${enOferta(p)?`<span class="tag-of">-${p.descuento}%</span>`:''}</div>
-      <div class="nm">${esc(nom(p.nombre))}</div><div class="pr">${precioHtml(p.precio,enOferta(p)?p.precioAntes:0)}</div>${tallas.length?`<div class="sz">${esc(tallas.join(' · '))}</div>`:''}</button>`;
+      <div class="nm">${esc(nom(p.nombre))}</div><div class="pr">${precioCard(p, agotado?null:p.variantes.filter(v=>v.stock>0))}</div>${tallas.length?`<div class="sz">${esc(tallas.join(' · '))}</div>`:''}</button>`;
   }).join('');
   MKF('despuesRender',{categoria,texto});
 }
@@ -440,25 +455,25 @@ function pintarProducto(conservar){
   const p=prodAbierto; if(!p) return;
   const fotos=fotosCache[p.id]&&fotosCache[p.id].length? fotosCache[p.id] : (p.thumb?[p.thumb]:[]);
   if(galIdx>=fotos.length) galIdx=0;
-  const colores=[...new Set(p.variantes.map(v=>v.color))], conColor=!(colores.length===1&&colores[0]==='Único');
-  const tallasAll=[...new Set(p.variantes.map(v=>v.talla))], conTalla=!(tallasAll.length===1&&tallasAll[0]==='Única');
+  const colores=ordenarVer([...new Set(p.variantes.map(v=>v.color))]), conColor=!(colores.length===1&&colores[0]==='Único');
+  const tallasAll=ordenarMl([...new Set(p.variantes.map(v=>v.talla))]), conTalla=!(tallasAll.length===1&&tallasAll[0]==='Única');
   const v=varianteSel(); const disp=v?v.stock:0;
   if(selQty>Math.max(1,disp)) selQty=Math.max(1,disp);
   const agotado=stockTotal(p)<=0;
   const cerrada=!CFG.abierta;
-  const colorHtml=conColor?`<div class="opt-t">Color <span>${esc(selColor||'elige uno')}</span></div><div class="opts">${colores.map(c=>{ const hay=p.variantes.some(x=>x.color===c&&x.stock>0); return `<button class="opt" data-color="${esc(c)}" aria-pressed="${c===selColor}" ${hay?'':'disabled'}>${esc(c)}</button>`; }).join('')}</div>`:'';
-  const tallasMostrar=conColor&&selColor? [...new Set(p.variantes.filter(x=>x.color===selColor).map(x=>x.talla))] : tallasAll;
+  const colorHtml=conColor?`<div class="opt-t">Versión <span>${esc(selColor||'elige una')}</span></div><div class="opts">${colores.map(c=>{ const hay=p.variantes.some(x=>x.color===c&&x.stock>0); return `<button class="opt" data-color="${esc(c)}" aria-pressed="${c===selColor}" ${hay?'':'disabled'}>${esc(c)}</button>`; }).join('')}</div>`:'';
+  const tallasMostrar=conColor&&selColor? ordenarMl([...new Set(p.variantes.filter(x=>x.color===selColor).map(x=>x.talla))]) : tallasAll;
   const tallaHtml=conTalla?`<div class="opt-t">Presentación <span>${esc(selTalla||'elige una')}</span></div><div class="opts">${tallasMostrar.map(t=>{ const hay=p.variantes.some(x=>(!conColor||!selColor||x.color===selColor)&&x.talla===t&&x.stock>0); return `<button class="opt" data-talla="${esc(t)}" aria-pressed="${t===selTalla}" ${hay?'':'disabled'}>${esc(t)}</button>`; }).join('')}</div>`:'';
   let nota='';
   if(agotado) nota='Este perfume está agotado por ahora.';
   else if(v && v.stock<=3) nota=`Quedan ${v.stock} ${v.stock===1?'unidad':'unidades'}`;
-  else if((conColor&&!selColor)||(conTalla&&!selTalla)) nota='Elige '+[conColor&&!selColor?'el color':'',conTalla&&!selTalla?'la presentación':''].filter(Boolean).join(' y ')+' para continuar';
+  else if((conColor&&!selColor)||(conTalla&&!selTalla)) nota='Elige '+[conColor&&!selColor?'la versión':'',conTalla&&!selTalla?'la presentación':''].filter(Boolean).join(' y ')+' para continuar';
   const puede=!!v && v.stock>0 && !cerrada;
   $('sheet-prod').innerHTML=`<button class="sh-close" onclick="cerrarHojas()" aria-label="Cerrar">×</button>
   <div class="prod-body">
     <div class="gal"><div class="gal-main">${fotos.length?`<img src="${esc(fotos[galIdx])}" alt="${esc(p.nombre)}">`:`<div class="ph vacio" style="height:100%;border-radius:0"><img src="${LOGO}" alt=""></div>`}</div>
       ${fotos.length>1?`<div class="gal-th">${fotos.map((f,i)=>`<button data-g="${i}" aria-label="Foto ${i+1}" aria-current="${i===galIdx}"><img src="${esc(f)}" alt=""></button>`).join('')}</div>`:''}</div>
-    <div class="info"><h2>${esc(p.nombre)}</h2><div class="precio">${precioHtml(v?v.precio:p.precio, v?(v.precioAntes||0):(enOferta(p)?p.precioAntes:0))}</div>${(v?v.precioAntes>v.precio:enOferta(p))?`<div class="ahorro">-${p.descuento}% · ahorras ${fmt(v?v.precioAntes-v.precio:p.precioAntes-p.precio)}${p.descHasta?' · hasta el '+esc(new Date(p.descHasta).toLocaleDateString('es-CO',{day:'numeric',month:'long'})):''}</div>`:''}
+    <div class="info"><h2>${esc(p.nombre)}</h2><div class="precio">${v? precioHtml(v.precio, v.precioAntes||0) : precioCard(p, p.variantes.filter(x=>(!selColor||x.color===selColor)))}</div>${(v?v.precioAntes>v.precio:enOferta(p))?`<div class="ahorro">-${p.descuento}% · ahorras ${fmt(v?v.precioAntes-v.precio:p.precioAntes-p.precio)}${p.descHasta?' · hasta el '+esc(new Date(p.descHasta).toLocaleDateString('es-CO',{day:'numeric',month:'long'})):''}</div>`:''}
       ${p.descripcion?`<div class="desc">${esc(p.descripcion)}</div>`:''}
       ${colorHtml}${tallaHtml}
       <div class="stock-note ${v&&v.stock<=3&&v.stock>0?'ultimas':''}">${esc(nota)}</div>

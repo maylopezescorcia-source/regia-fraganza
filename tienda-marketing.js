@@ -107,6 +107,7 @@ function palabra(n){ return n + ' ' + (n === 1 ? TEXTOS.palabra[0] : TEXTOS.pala
 function tallaCanon(t){
   const x = String(t == null ? '' : t).trim();
   if (!x || /^(unic[ao]|única|único|unica|unico)$/i.test(x)) return 'Única';
+  const ml = x.match(/^(\d+(?:[.,]\d+)?)\s*ml$/i); if (ml) return ml[1].replace(',', '.') + ' ml'; // 5 ml, 100 ml
   return x.length <= 4 ? x.toUpperCase() : titulo(x);
 }
 function colorCanon(c){
